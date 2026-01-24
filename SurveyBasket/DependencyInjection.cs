@@ -9,16 +9,13 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddDependencies(this IServiceCollection services)
     {
-        // Add services to the container.
-
+        
         services.AddControllers();
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-
-        services.AddSwaggerServices();
-
-        services.AddFluentValidationServices();
-
-        services.AddMapsterServices();
+        
+        services
+            .AddSwaggerServices()
+            .AddFluentValidationServices()
+            .AddMapsterServices();
 
 
         services.AddScoped<IPollService, PollService>();
@@ -26,7 +23,6 @@ public static class DependencyInjection
         return services;
 
     }
-
 
     public static IServiceCollection AddSwaggerServices (this IServiceCollection services)
     {
