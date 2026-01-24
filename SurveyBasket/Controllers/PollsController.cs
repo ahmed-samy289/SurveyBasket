@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Mapster;
+using Microsoft.AspNetCore.Http;
+using SurveyBasket.Contracts.Requests;
+using SurveyBasket.Contracts.Responses;
+using SurveyBasket.Mapping;
 
 
 namespace SurveyBasket.Controllers;
@@ -12,34 +16,40 @@ public class PollsController(IPollService pollService) : ControllerBase
     [HttpGet("")]
     public IActionResult GetAll()
     {
-        return Ok(_pollService.GetAll());
+        var polls = _pollService.GetAll();
+
+        var Response = polls.Adapt<IEnumerable<Poll>>();
+
+        return Ok(Response);
     }
 
     [HttpGet("{Id}")]
     public IActionResult Get(int Id)
     {
-        var polls = _pollService.Get(Id);
+        var poll = _pollService.Get(Id);
 
-        if (polls is null)
+        if (poll is null)
         {
             return NotFound();
         }
 
-        return Ok(polls);
+        PollResponse response = poll.Adapt<PollResponse>();
+
+        return Ok(response);
     }
 
     [HttpPost("")]
-    public IActionResult Add(Poll request)
+    public IActionResult Add(CreatePollRequest request)
     {
-        var newPoll = _pollService.Add(request);
+        var newPoll = _pollService.Add(request.Adapt<Poll>());
 
         return CreatedAtAction(nameof(Get), new { Id = newPoll.Id }, newPoll);
     }
 
     [HttpPut("{Id}")]
-    public IActionResult Update(int Id, Poll request)
+    public IActionResult Update(int Id, CreatePollRequest request)
     {
-        var IsUpdated = _pollService.Put(Id, request);
+        var IsUpdated = _pollService.Put(Id, request.Adapt<Poll>());
 
         if (!IsUpdated)
         {
