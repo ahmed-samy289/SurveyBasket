@@ -1,17 +1,25 @@
-﻿using Mapster;
+﻿using FluentValidation.AspNetCore;
+using Mapster;
 using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
+using SurveyBasket.Persistence;
 using System.Reflection;
-using FluentValidation.AspNetCore;
 
 namespace SurveyBasket;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddDependencies(this IServiceCollection services)
+    public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration configuration)
     {
         
         services.AddControllers();
-        
+
+
+        var connectionString = configuration.GetConnectionString("DefaultConnection") ??
+            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+        services.AddDbContext<ApplicationDbContext>(Options => Options.UseSqlServer(connectionString));
+
         services
             .AddSwaggerServices()
             .AddFluentValidationServices()
@@ -48,7 +56,5 @@ public static class DependencyInjection
         );
         return services;
     }
-
-
 
 }

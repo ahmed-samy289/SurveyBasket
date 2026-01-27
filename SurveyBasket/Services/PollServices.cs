@@ -2,36 +2,30 @@
 
 namespace SurveyBasket.Services;
 
-public class PollService : IPollService
+public class PollService(ApplicationDbContext context) : IPollService
 {
-    private static readonly List<Poll> _Polls = [
-        new Poll{
-            Id = 1,
-            Title = "Poll 1",
-            Description = "First Poll"
-        }
-    ];
+    private readonly ApplicationDbContext _context = context;
 
-    public IEnumerable<Poll> GetAll()
+    public async Task<IEnumerable<Poll>> GetAllAsync(CancellationToken cancellationToken = default)=>
+        await _context.Polls.AsNoTracking().ToListAsync(cancellationToken);
+
+
+    public async Task<Poll?> GetAsync(int Id, CancellationToken cancellationToken = default)
     {
-        return _Polls;
+        return await _context.Polls.FindAsync(Id,cancellationToken);
     }
 
-    public Poll? Get(int Id)
+    public async Task<Poll> AddAsync(Poll poll, CancellationToken cancellationToken = default)
     {
-        return _Polls.SingleOrDefault(X => X.Id == Id);
-    }
+        await _context.Polls.AddAsync(poll,cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
 
-    public Poll Add(Poll poll)
-    {
-        poll.Id = _Polls.Count + 1;
-        _Polls.Add(poll);
         return poll;
     }
 
-    public bool Put(int Id, Poll poll)
+    public async Task<bool> PutAsync(int Id, Poll poll, CancellationToken cancellationToken = default)
     {
-        var CurrentPoll = Get(Id);
+        var CurrentPoll = await GetAsync(Id,cancellationToken);
 
         if (CurrentPoll is null)
         {
@@ -39,23 +33,46 @@ public class PollService : IPollService
         }
 
         CurrentPoll.Title = poll.Title;
-        CurrentPoll.Description = poll.Description;
+        CurrentPoll.Summary = poll.Summary;
+        CurrentPoll.StartsAt = poll.StartsAt;
+        CurrentPoll.EndsAt  = poll.EndsAt;
+
+        await _context.SaveChangesAsync(cancellationToken);
 
         return true;
 
     }
 
-    public bool Delete(int Id)
+    public async Task<bool> DeleteAsync(int Id,CancellationToken cancellationToken = default)
     {
-        var Poll = Get(Id);
+        var Poll = await GetAsync(Id,cancellationToken);
 
         if (Poll is null)
         {
             return false;
         }
 
-        _Polls.Remove(Poll);
+        _context.Remove(Poll);
+
+        await _context.SaveChangesAsync(cancellationToken);
 
         return true;
+    }
+
+    public async Task<bool> TogglePublishAsync(int Id, CancellationToken cancellationToken = default)
+    {
+        var Poll = await GetAsync(Id, cancellationToken);
+
+        if (Poll is null)
+        {
+            return false;
+        }
+
+        Poll.IsPublished = !Poll.IsPublished;
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return true;
+
     }
 }
