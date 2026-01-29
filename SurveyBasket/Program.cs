@@ -1,8 +1,4 @@
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using SurveyBasket.Persistence;
-
 var builder = WebApplication.CreateBuilder(args);
 
 

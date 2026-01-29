@@ -1,4 +1,7 @@
-﻿namespace SurveyBasket.Controllers;
+﻿using Microsoft.AspNetCore.Authorization;
+using SurveyBasket.Contracts.Polls;
+
+namespace SurveyBasket.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -7,6 +10,7 @@ public class PollsController(IPollService pollService) : ControllerBase
     private readonly IPollService _pollService = pollService;
 
     [HttpGet("")]
+    [Authorize]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var polls = await _pollService.GetAllAsync(cancellationToken);
@@ -17,7 +21,7 @@ public class PollsController(IPollService pollService) : ControllerBase
     }
 
     [HttpGet("{Id}")]
-    public async Task<IActionResult> Get(int Id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Get([FromRoute]int Id, CancellationToken cancellationToken)
     {
         var poll =await _pollService.GetAsync(Id,cancellationToken);
 
@@ -32,7 +36,7 @@ public class PollsController(IPollService pollService) : ControllerBase
     }
 
     [HttpPost("")]
-    public async Task<IActionResult> Add(PollRequest request , CancellationToken cancellationToken)
+    public async Task<IActionResult> Add([FromBody]PollRequest request , CancellationToken cancellationToken)
     {
         var newPoll = await _pollService.AddAsync(request.Adapt<Poll>(), cancellationToken);
 
@@ -40,7 +44,7 @@ public class PollsController(IPollService pollService) : ControllerBase
     }
 
     [HttpPut("{Id}")]
-    public async Task<IActionResult> Update([FromRoute]int Id, PollRequest request ,CancellationToken cancellationToken )
+    public async Task<IActionResult> Update([FromRoute]int Id,[FromBody]PollRequest request ,CancellationToken cancellationToken )
     {
         var IsUpdated = await _pollService.PutAsync(Id, request.Adapt<Poll>(), cancellationToken);
 
