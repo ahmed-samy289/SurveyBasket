@@ -23,8 +23,9 @@ public static class DependencyInjection
 
         services.AddDbContext<ApplicationDbContext>(Options => Options.UseSqlServer(connectionString));
 
+
         services
-            .AddAuthConfig()
+            .AddAuthConfig(configuration)
             .AddSwaggerServices()
             .AddFluentValidationServices()
             .AddMapsterServices();
@@ -61,9 +62,18 @@ public static class DependencyInjection
         );
         return services;
     }
-    private static IServiceCollection AddAuthConfig (this IServiceCollection services)
+    private static IServiceCollection AddAuthConfig (this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IJwtProvider, JwtProvider>();
+
+        //services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+
+        services.AddOptions<JwtOptions>()
+            .Bind(configuration.GetSection(JwtOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        var JwtSettings = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
 
         services.AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -80,11 +90,11 @@ public static class DependencyInjection
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidateLifetime =  true,
+                    ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = "SurveyBasketAPI",
-                    ValidAudience = "SurveyBasketClient",
-                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("ThisIsASecretKeyForJwtTokenGeneration1234"))
+                    ValidIssuer = JwtSettings?.Issuer,
+                    ValidAudience = JwtSettings?.Audience,
+                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(JwtSettings?.Key!))
                 };
             });
 

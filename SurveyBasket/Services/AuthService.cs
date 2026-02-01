@@ -4,17 +4,18 @@ using SurveyBasket.Authentication;
 
 namespace SurveyBasket.Services;
 
-public class AuthService(UserManager<ApplicationUser> userManager , IJwtProvider jwtProvider) : IAuthService
+public class AuthService(UserManager<ApplicationUser> userManager, IJwtProvider jwtProvider) : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
-    private readonly IJwtProvider _JwtProvider  = jwtProvider;
+    private readonly IJwtProvider _JwtProvider = jwtProvider;
 
 
     public async Task<AuthResponse?> GetTokenAsync(string Email, string Password, CancellationToken cancellationToken = default)
     {
         var User = await _userManager.FindByEmailAsync(Email);
 
-        if (User is null) { 
+        if (User is null)
+        {
             return null;
         }
 
