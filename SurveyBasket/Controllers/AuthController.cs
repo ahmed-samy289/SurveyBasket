@@ -14,4 +14,21 @@ public class AuthController(IAuthService authService) : ControllerBase
 
         return authResult is null ? BadRequest("Invalid Email/Password ") : Ok(authResult);
     }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshAsync(RefreshTokenRequest request, CancellationToken cancellationToken)
+    {
+        var authResult = await _authService.GetRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
+
+        return authResult is null ? BadRequest("Invalid Token ") : Ok(authResult);
+    }
+    
+    
+    [HttpPost("revoke-refresh-token")]
+    public async Task<IActionResult> RevokeRefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken)
+    {
+        var isRevoked = await _authService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
+
+        return isRevoked ? Ok() : BadRequest("Invlaid Operation ");
+    }
 }
