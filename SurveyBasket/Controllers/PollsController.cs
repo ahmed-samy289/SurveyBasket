@@ -15,7 +15,7 @@ public class PollsController(IPollService pollService) : ControllerBase
     {
         var polls = await _pollService.GetAllAsync(cancellationToken);
 
-        var Response = polls.Adapt<IEnumerable<Poll>>();
+        var Response = polls.Adapt<IEnumerable<PollResponse>>();
 
         return Ok(Response);
     }
