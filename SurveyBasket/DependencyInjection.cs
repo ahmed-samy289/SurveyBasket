@@ -17,11 +17,23 @@ public static class DependencyInjection
         
         services.AddControllers();
 
-
         var connectionString = configuration.GetConnectionString("DefaultConnection") ??
             throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
         services.AddDbContext<ApplicationDbContext>(Options => Options.UseSqlServer(connectionString));
+
+        var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>();
+
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy
+                    .WithOrigins(allowedOrigins!)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
 
 
         services
