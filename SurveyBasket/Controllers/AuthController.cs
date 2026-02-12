@@ -12,7 +12,9 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         var authResult = await _authService.GetTokenAsync(request.Email, request.Password, cancellationToken);
 
-        return authResult.IsSuccess ? Ok(authResult.Value) : BadRequest(authResult.Error);
+        return authResult.IsSuccess 
+            ? Ok(authResult.Value) 
+            : Problem(statusCode: StatusCodes.Status400BadRequest, title: authResult.Error.Code, detail: authResult.Error.Description);
     }
 
     [HttpPost("refresh")]
@@ -20,7 +22,9 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         var authResult = await _authService.GetRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
 
-        return authResult is null ? BadRequest("Invalid Token ") : Ok(authResult);
+        return authResult.IsSuccess 
+            ? Ok(authResult.Value) 
+            : Problem(statusCode: StatusCodes.Status400BadRequest, title: authResult.Error.Code, detail: authResult.Error.Description);
     }
     
     
@@ -29,6 +33,8 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         var isRevoked = await _authService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
 
-        return isRevoked ? Ok() : BadRequest("Invlaid Operation ");
+        return isRevoked.IsSuccess 
+            ? Ok() 
+            : Problem(statusCode: StatusCodes.Status400BadRequest, title: isRevoked.Error.Code, detail: isRevoked.Error.Description);
     }
 }
