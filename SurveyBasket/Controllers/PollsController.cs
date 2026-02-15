@@ -26,13 +26,9 @@ public class PollsController(IPollService pollService) : ControllerBase
     {
         var result =await _pollService.GetAsync(Id,cancellationToken);
 
-        return result.IsSuccess 
-            ? Ok(result.Value) 
-            : Problem(
-                statusCode: StatusCodes.Status404NotFound,
-                title: result.Error.Code,
-                detail: result.Error.Description
-            );
+        return result.IsSuccess
+            ? Ok(result.Value)
+            : result.ToProblem(StatusCodes.Status404NotFound);
     }
 
     [HttpPost("")]
@@ -48,7 +44,7 @@ public class PollsController(IPollService pollService) : ControllerBase
     {
         var IsUpdated = await _pollService.PutAsync(Id, request, cancellationToken);
 
-        return IsUpdated.IsSuccess ? NoContent() : Problem(statusCode: StatusCodes.Status404NotFound, title: IsUpdated.Error.Code, detail: IsUpdated.Error.Description);
+        return IsUpdated.IsSuccess ? NoContent() : IsUpdated.ToProblem(StatusCodes.Status404NotFound);
     }
 
     [HttpDelete("{Id}")]
@@ -57,7 +53,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
         var IsDeleted = await _pollService.DeleteAsync(Id, cancellationToken);
 
-        return IsDeleted.IsSuccess ? NoContent() : Problem(statusCode: StatusCodes.Status404NotFound, title: IsDeleted.Error.Code, detail: IsDeleted.Error.Description);
+        return IsDeleted.IsSuccess ? NoContent() : IsDeleted.ToProblem(StatusCodes.Status404NotFound);
     }
 
     [HttpPut("{Id}/togglePublish")]
@@ -65,7 +61,7 @@ public class PollsController(IPollService pollService) : ControllerBase
     {
         var IsUpdated = await _pollService.TogglePublishAsync(Id, cancellationToken);
 
-        return IsUpdated.IsSuccess ? NoContent() : Problem(statusCode: StatusCodes.Status404NotFound, title: IsUpdated.Error.Code, detail: IsUpdated.Error.Description);
+        return IsUpdated.IsSuccess ? NoContent() : IsUpdated.ToProblem(StatusCodes.Status404NotFound);
     }
 
 }
