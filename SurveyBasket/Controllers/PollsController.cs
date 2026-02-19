@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using SurveyBasket.Abstractions;
 using SurveyBasket.Contracts.Polls;
+using SurveyBasket.Errors;
 
 namespace SurveyBasket.Controllers;
 
@@ -34,17 +35,24 @@ public class PollsController(IPollService pollService) : ControllerBase
     [HttpPost("")]
     public async Task<IActionResult> Add([FromBody] PollRequest request, CancellationToken cancellationToken)
     {
-        var newPoll = await _pollService.AddAsync(request, cancellationToken);
+        var result = await _pollService.AddAsync(request, cancellationToken);
 
-        return CreatedAtAction(nameof(Get), new { Id = newPoll.Id }, newPoll);
+        return result.IsSuccess 
+            ? CreatedAtAction(nameof(Get), new { Id = result.Value.Id }, result.Value)
+            : result.ToProblem(StatusCodes.Status409Conflict);
     }
 
     [HttpPut("{Id}")]
     public async Task<IActionResult> Update([FromRoute] int Id, [FromBody] PollRequest request, CancellationToken cancellationToken)
     {
-        var IsUpdated = await _pollService.PutAsync(Id, request, cancellationToken);
+        var result = await _pollService.PutAsync(Id, request, cancellationToken);
 
-        return IsUpdated.IsSuccess ? NoContent() : IsUpdated.ToProblem(StatusCodes.Status404NotFound);
+        if (result.IsSuccess)
+            return NoContent();
+
+        return result.Error.Equals(PollErrors.DuplicatedTitle)
+                ? result.ToProblem(StatusCodes.Status409Conflict)
+                : result.ToProblem(StatusCodes.Status404NotFound);
     }
 
     [HttpDelete("{Id}")]

@@ -20,18 +20,32 @@ public class PollService(ApplicationDbContext context) : IPollService
             : Result.Failure<PollResponse>(PollErrors.NotFound);
     }
 
-    public async Task<PollResponse> AddAsync(PollRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<PollResponse>> AddAsync(PollRequest request, CancellationToken cancellationToken = default)
     {
+        var isExisting = await _context.Polls.AnyAsync(p => p.Title == request.Title, cancellationToken);
+
+        if (isExisting)
+        {
+            return Result.Failure<PollResponse>(PollErrors.DuplicatedTitle);
+        }
+
         var poll = request.Adapt<Poll>();
 
         await _context.Polls.AddAsync(poll, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return poll.Adapt<PollResponse>();
+        return Result.Success(poll.Adapt<PollResponse>());
     }
     
     public async Task<Result> PutAsync(int Id, PollRequest request, CancellationToken cancellationToken = default)
     {
+        var isExisting = await _context.Polls.AnyAsync(p => p.Title == request.Title, cancellationToken);
+
+        if (isExisting)
+        {
+            return Result.Failure(PollErrors.DuplicatedTitle);
+        }
+
         var CurrentPoll = await _context.Polls.FindAsync(Id, cancellationToken);
 
         if (CurrentPoll is null)
