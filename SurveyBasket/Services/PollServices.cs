@@ -39,7 +39,7 @@ public class PollService(ApplicationDbContext context) : IPollService
     
     public async Task<Result> PutAsync(int Id, PollRequest request, CancellationToken cancellationToken = default)
     {
-        var isExisting = await _context.Polls.AnyAsync(p => p.Title == request.Title, cancellationToken);
+        var isExisting = await _context.Polls.AnyAsync(p => p.Title == request.Title && p.Id != Id, cancellationToken);
 
         if (isExisting)
         {

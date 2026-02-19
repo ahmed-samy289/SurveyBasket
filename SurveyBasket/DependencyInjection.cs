@@ -18,11 +18,14 @@ public static class DependencyInjection
         
         services.AddControllers();
 
+        //handle database connection
         var connectionString = configuration.GetConnectionString("DefaultConnection") ??
             throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
         services.AddDbContext<ApplicationDbContext>(Options => Options.UseSqlServer(connectionString));
 
+
+        //handle CORS
         var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>();
 
         services.AddCors(options =>
@@ -43,11 +46,13 @@ public static class DependencyInjection
             .AddFluentValidationServices()
             .AddMapsterServices();
 
-
+        // Add application services
         services.AddScoped<IPollService, PollService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IQuestionService, QuestionService>();
 
 
+        //Global error handling
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
 
@@ -55,11 +60,14 @@ public static class DependencyInjection
 
     }
 
+    // Add services related to Swagger/OpenAPI
     private static IServiceCollection AddSwaggerServices (this IServiceCollection services)
     {
         services.AddOpenApi();
         return services;
     }
+
+    // Add services related to FluentValidation
     private static IServiceCollection AddFluentValidationServices (this IServiceCollection services)
     {
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
@@ -68,6 +76,8 @@ public static class DependencyInjection
 
         return services;
     }
+
+    // Add services related to Mapster
     private static IServiceCollection AddMapsterServices (this IServiceCollection services)
     {
         // Add Mapster
@@ -79,12 +89,15 @@ public static class DependencyInjection
         );
         return services;
     }
+
+    // Add services related to Authentication and JWT
     private static IServiceCollection AddAuthConfig (this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IJwtProvider, JwtProvider>();
 
         //services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
+        // Bind and validate JwtOptions
         services.AddOptions<JwtOptions>()
             .Bind(configuration.GetSection(JwtOptions.SectionName))
             .ValidateDataAnnotations()
@@ -92,9 +105,12 @@ public static class DependencyInjection
 
         var JwtSettings = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
 
+        // Add Identity services
         services.AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
+
+        // Configure authentication to use JWT Bearer tokens
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
