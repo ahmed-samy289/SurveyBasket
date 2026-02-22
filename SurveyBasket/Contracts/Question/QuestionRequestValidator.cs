@@ -6,13 +6,16 @@ public class QuestionRequestValidator: AbstractValidator<QuestionRequest>
     {
         RuleFor(x => x.Content).NotEmpty().Length(3, 1000);
 
+        RuleFor(x => x.Answers).NotNull();
+
         RuleFor(x => x.Answers)
             .Must(x => x.Count > 1)
-            .WithMessage("Question should have more than one answer");
-        
+            .WithMessage("Question should have more than one answer")
+            .When(x => x.Answers != null);
+
         RuleFor(x => x.Answers)
-            .NotNull()
             .Must(x => x.Distinct().Count() == x.Count)
-            .WithMessage("Question cannot have duplicated answers");
+            .WithMessage("Question cannot have duplicated answers")
+            .When(x => x.Answers != null);
     }
 }
