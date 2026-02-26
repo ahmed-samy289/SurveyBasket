@@ -1,6 +1,7 @@
 ﻿using SurveyBasket.Contracts.Answer;
 using SurveyBasket.Contracts.Question;
 using SurveyBasket.Errors;
+using System.Collections.Generic;
 
 namespace SurveyBasket.Services;
 
@@ -25,6 +26,36 @@ public class QuestionService(ApplicationDbContext context) : IQuestionService
             //    x.Answers.Select(a => new AnswerResponse(a.Id, a.Content))
             //))
             .ProjectToType<QuestionResponse>()
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return Result.Success<IEnumerable<QuestionResponse>>(questions);
+    }
+
+    public async Task<Result<IEnumerable<QuestionResponse>>> GetAvailableAsync(int PollId, string UserId, CancellationToken cancellationToken)
+    {
+        var hasVote = await _context.Votes.AnyAsync(x => x.PollId == PollId && x.UserId == UserId, cancellationToken);
+
+        if (hasVote)
+        {
+            return Result.Failure<IEnumerable<QuestionResponse>>(VoteErrors.HasVoted);
+        }
+
+        var pollIsExist = await _context.Polls.AnyAsync(x => x.Id == PollId && x.IsPublished && x.StartsAt <= DateOnly.FromDateTime(DateTime.UtcNow) && x.EndsAt >= DateOnly.FromDateTime(DateTime.UtcNow),cancellationToken);
+
+        if (!pollIsExist) 
+        {
+            return Result.Failure<IEnumerable<QuestionResponse>>(PollErrors.NotFound);
+        }
+
+        var questions = await _context.Questions
+            .Where(x => x.PollId == PollId && x.isActive)
+            .Include(x => x.Answers)
+            .Select(q => new QuestionResponse(
+                q.Id,
+                q.Content,
+                q.Answers.Where(x => x.isActive).Select(a => new AnswerResponse(a.Id, a.Content))
+            ))
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
