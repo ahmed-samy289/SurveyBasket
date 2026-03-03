@@ -1,5 +1,6 @@
 ﻿using SurveyBasket.Contracts.Answer;
 using SurveyBasket.Contracts.Question;
+using SurveyBasket.Entities;
 using SurveyBasket.Errors;
 using System.Collections.Generic;
 
@@ -34,19 +35,17 @@ public class QuestionService(ApplicationDbContext context) : IQuestionService
 
     public async Task<Result<IEnumerable<QuestionResponse>>> GetAvailableAsync(int PollId, string UserId, CancellationToken cancellationToken)
     {
+        
+
         var hasVote = await _context.Votes.AnyAsync(x => x.PollId == PollId && x.UserId == UserId, cancellationToken);
 
         if (hasVote)
-        {
             return Result.Failure<IEnumerable<QuestionResponse>>(VoteErrors.DuplicatedVote);
-        }
 
-        var pollIsExist = await _context.Polls.AnyAsync(x => x.Id == PollId && x.IsPublished && x.StartsAt <= DateOnly.FromDateTime(DateTime.UtcNow) && x.EndsAt >= DateOnly.FromDateTime(DateTime.UtcNow),cancellationToken);
+        var pollIsExists = await _context.Polls.AnyAsync(x => x.Id == PollId && x.IsPublished && x.StartsAt <= DateOnly.FromDateTime(DateTime.UtcNow) && x.EndsAt >= DateOnly.FromDateTime(DateTime.UtcNow), cancellationToken);
 
-        if (!pollIsExist) 
-        {
+        if (!pollIsExists)
             return Result.Failure<IEnumerable<QuestionResponse>>(PollErrors.NotFound);
-        }
 
         var questions = await _context.Questions
             .Where(x => x.PollId == PollId && x.isActive)
@@ -54,7 +53,7 @@ public class QuestionService(ApplicationDbContext context) : IQuestionService
             .Select(q => new QuestionResponse(
                 q.Id,
                 q.Content,
-                q.Answers.Where(x => x.isActive).Select(a => new AnswerResponse(a.Id, a.Content))
+                q.Answers.Where(a => a.isActive).Select(a => new AnswerResponse(a.Id, a.Content))
             ))
             .AsNoTracking()
             .ToListAsync(cancellationToken);
