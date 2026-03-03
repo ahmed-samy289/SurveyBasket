@@ -31,7 +31,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
         return result.IsSuccess
             ? Ok(result.Value)
-            : result.ToProblem(StatusCodes.Status404NotFound);
+            : result.ToProblem();
     }
 
     [HttpPost("")]
@@ -41,7 +41,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
         return result.IsSuccess 
             ? CreatedAtAction(nameof(Get), new { Id = result.Value.Id }, result.Value)
-            : result.ToProblem(StatusCodes.Status409Conflict);
+            : result.ToProblem();
     }
 
     [HttpPut("{Id}")]
@@ -52,10 +52,8 @@ public class PollsController(IPollService pollService) : ControllerBase
         if (result.IsSuccess)
             return NoContent();
 
-        return result.Error.Equals(PollErrors.DuplicatedTitle)
-                ? result.ToProblem(StatusCodes.Status409Conflict)
-                : result.ToProblem(StatusCodes.Status404NotFound);
-    }
+        return result.ToProblem();
+    }   
 
     [HttpDelete("{Id}")]
     public async Task<IActionResult> Delete([FromRoute] int Id, CancellationToken cancellationToken)
@@ -63,7 +61,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
         var IsDeleted = await _pollService.DeleteAsync(Id, cancellationToken);
 
-        return IsDeleted.IsSuccess ? NoContent() : IsDeleted.ToProblem(StatusCodes.Status404NotFound);
+        return IsDeleted.IsSuccess ? NoContent() : IsDeleted.ToProblem();
     }
 
     [HttpPut("{Id}/togglePublish")]
@@ -71,7 +69,7 @@ public class PollsController(IPollService pollService) : ControllerBase
     {
         var IsUpdated = await _pollService.TogglePublishAsync(Id, cancellationToken);
 
-        return IsUpdated.IsSuccess ? NoContent() : IsUpdated.ToProblem(StatusCodes.Status404NotFound);
+        return IsUpdated.IsSuccess ? NoContent() : IsUpdated.ToProblem();
     }
 
 }

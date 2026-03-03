@@ -18,7 +18,7 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
     {
         var result = await _questionService.GetAllAsync(PollId, cancellationToken);
 
-        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(StatusCodes.Status404NotFound);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
     [HttpGet("{Id}")]
@@ -26,7 +26,7 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
     {
         var result = await _questionService.GetAsync(PollId, Id, cancellationToken);
 
-        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(StatusCodes.Status404NotFound);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
     [HttpPost("")]
@@ -39,9 +39,7 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
             return CreatedAtAction(nameof(Get), new { PollId, Id = result.Value.Id }, result.Value);
         }
 
-        return result.Error.Equals(QuestionErrors.DuplicatedContent)
-                ? result.ToProblem(StatusCodes.Status409Conflict)
-                : result.ToProblem(StatusCodes.Status404NotFound);
+        return result.ToProblem();
     }
 
     [HttpPut("{Id}")]
@@ -54,9 +52,7 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
             return NoContent();
         }
 
-        return result.Error.Equals(QuestionErrors.DuplicatedContent)
-                ? result.ToProblem(StatusCodes.Status409Conflict)
-                : result.ToProblem(StatusCodes.Status404NotFound);
+        return result.ToProblem();
     }
 
     [HttpPut("{Id}/toggleStatus")]
@@ -64,7 +60,7 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
     {
         var IsToggled = await _questionService.ToggleStatusAsync(PollId, Id, cancellationToken);
 
-        return IsToggled.IsSuccess ? NoContent() : IsToggled.ToProblem(StatusCodes.Status404NotFound);
+        return IsToggled.IsSuccess ? NoContent() : IsToggled.ToProblem();
     }
 
 }
