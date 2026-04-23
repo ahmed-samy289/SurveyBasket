@@ -8,5 +8,8 @@ public class MappingConfigrations : IRegister
     {
         config.NewConfig<QuestionRequest,Question>()
             .Map(dest => dest.Answers, src => src.Answers.Select(x => new Answer { Content = x }).ToList());
+
+        config.NewConfig<RegisterRequest, ApplicationUser>()
+            .Map(des => des.UserName, src => src.Email);
     }
 }
