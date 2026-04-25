@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Verification</title>
+</head>
+<body style="margin:0; padding:0; background-color:#1f1f1f; font-family:Arial, sans-serif;">
+
+    <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; margin:auto; background-color:#2b2b2b; color:#ffffff;">
+
+        <!-- Header -->
+        <tr>
+            <td style="text-align:center; padding:20px; font-size:22px; font-weight:bold;">
+                Survey Basket
+            </td>
+        </tr>
+
+        <!-- Content -->
+        <tr>
+            <td style="padding:30px;">
+
+                <p style="font-size:20px; margin:0 0 20px;">
+                    Hi {{name}},
+                </p>
+
+                <p style="font-size:16px; margin:0 0 30px; color:#cccccc;">
+                    To confirm your email, please click the button below:
+                </p>
+
+                <!-- Button -->
+                <div style="text-align:center; margin-bottom:30px;">
+                    <a href="{{action_url}}"
+                       style="background-color:#28a745; color:#ffffff; padding:12px 25px; text-decoration:none; border-radius:5px; font-size:16px; display:inline-block;">
+                        Verify email address
+                    </a>
+                </div>
+
+                <p style="font-size:16px; margin:0 0 10px;">
+                    Thanks,
+                </p>
+
+                <p style="font-size:16px; margin:0 0 30px;">
+                    Survey Basket team
+                </p>
+
+                <hr style="border:0; border-top:1px solid #444444; margin:30px 0;">
+
+                <p style="font-size:14px; color:#aaaaaa; margin-bottom:10px;">
+                    If you're having trouble with the button above, copy and paste the URL below into your web browser.
+                </p>
+
+                <p style="font-size:14px; color:#28a745; word-break:break-all;">
+                    {{action_url}}
+                </p>
+
+            </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+            <td style="text-align:center; padding:20px; font-size:12px; color:#888888;">
+                Survey Basket<br />
+                1234 Street Rd<br />
+                Cairo, Egypt
+            </td>
+        </tr>
+
+    </table>
+
+</body>
+</html>

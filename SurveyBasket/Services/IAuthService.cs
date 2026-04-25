@@ -7,4 +7,5 @@ public interface IAuthService
     Task<Result> RevokeRefreshTokenAsync(string Token, string RefreshToken, CancellationToken cancellationToken = default);
     Task<Result> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default);
     Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request);
+    Task<Result> ResendConfirmationEmailAsync(ResendComfirmationEmailRequest request);
 }

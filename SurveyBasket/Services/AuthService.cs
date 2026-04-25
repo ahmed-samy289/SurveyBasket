@@ -160,7 +160,6 @@ public class AuthService(
 
     }
 
-
     public async Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request)
     {
         if (await _userManager.FindByIdAsync(request.UserId) is not { } user)
@@ -197,6 +196,28 @@ public class AuthService(
 
     }
 
+    public async Task<Result> ResendConfirmationEmailAsync(ResendComfirmationEmailRequest request) {
+
+        if (await _userManager.FindByEmailAsync(request.Email) is not { } user)
+        {
+            return Result.Success(); // for security reasons we return success even if the email is not found
+        }
+
+        if (user.EmailConfirmed)
+        {
+            return Result.Failure(UserErrors.DuplictedConfirmation);
+        }
+
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+        _logger.LogInformation("Confirmation code: {Code}", code);
+
+        // TODO: Send confirmation email with the code
+
+        return Result.Success();
+    }
+
 
     private string GenerateRefreshToken()
     {
@@ -206,5 +227,4 @@ public class AuthService(
         return Convert.ToBase64String(randomNumber);
     }
 
-    
 }

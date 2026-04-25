@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using SurveyBasket.Authentication;
 using SurveyBasket.Errors;
 using SurveyBasket.Persistence;
+using SurveyBasket.Settings;
 using System.Reflection;
 
 namespace SurveyBasket;
@@ -57,6 +58,8 @@ public static class DependencyInjection
         //Global error handling
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
+
+        services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
 
         return services;
 
