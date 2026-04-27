@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using SurveyBasket.Abstractions;
 using SurveyBasket.Authentication;
 using SurveyBasket.Errors;
+using SurveyBasket.Helpers;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
 using System.Text;
@@ -13,13 +15,17 @@ public class AuthService(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
     ILogger<AuthService> logger,
-    IJwtProvider jwtProvider) : IAuthService
+    IJwtProvider jwtProvider,
+    IEmailSender emailSender,
+    IHttpContextAccessor httpContextAccessor
+    ) : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
     private readonly ILogger<AuthService> _logger = logger;
     private readonly IJwtProvider _JwtProvider = jwtProvider;
-
+    private readonly IEmailSender _emailSender = emailSender;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
     private readonly int _RefreshTokenExpiryDays = 14;
 
     public async Task<Result<AuthResponse>> GetTokenAsync(string Email, string Password, CancellationToken cancellationToken = default)
@@ -149,7 +155,7 @@ public class AuthService(
 
             _logger.LogInformation("Confirmation code: {Code}", code);
 
-            // TODO: Send confirmation email with the code
+            await SendConfirmationEmailAsync(User, code);  
 
             return Result.Success();
         }
@@ -213,7 +219,7 @@ public class AuthService(
 
         _logger.LogInformation("Confirmation code: {Code}", code);
 
-        // TODO: Send confirmation email with the code
+        await SendConfirmationEmailAsync(user, code);
 
         return Result.Success();
     }
@@ -225,6 +231,20 @@ public class AuthService(
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(randomNumber);
         return Convert.ToBase64String(randomNumber);
+    }
+
+    private async Task SendConfirmationEmailAsync(ApplicationUser user, string code)
+    {
+        var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
+
+        var emailBody = EmailBodyBuilder.GenerateEmailBody("EmailConfirmation",
+            new Dictionary<string, string>
+            {
+                    { "{{name}}", user.FirstName },
+                    { "{{action_url}}", $"{origin}/auth/email-confirmation?userId={user.Id}&code={code}" }
+            });
+
+        await _emailSender.SendEmailAsync(user.Email!, "Confirm your email", emailBody);
     }
 
 }
