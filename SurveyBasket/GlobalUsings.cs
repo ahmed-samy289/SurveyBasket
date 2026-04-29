@@ -4,6 +4,7 @@ global using Microsoft.EntityFrameworkCore.Metadata.Builders;
 global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 global using FluentValidation;
 global using Mapster;
+global using Microsoft.AspNetCore.Identity;
 
 global using SurveyBasket.Persistence;
 global using SurveyBasket;
