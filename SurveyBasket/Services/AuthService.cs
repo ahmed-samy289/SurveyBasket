@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using SurveyBasket.Abstractions;
@@ -244,7 +245,9 @@ public class AuthService(
                     { "{{action_url}}", $"{origin}/auth/email-confirmation?userId={user.Id}&code={code}" }
             });
 
-        await _emailSender.SendEmailAsync(user.Email!, "Confirm your email", emailBody);
+        BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "Confirm your email", emailBody));
+
+        await Task.CompletedTask;
     }
 
 }

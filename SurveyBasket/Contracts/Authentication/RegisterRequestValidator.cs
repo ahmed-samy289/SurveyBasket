@@ -8,8 +8,7 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
     {
         RuleFor(x => x.Email)
             .NotEmpty()
-            .EmailAddress()
-            .Mu
+            .EmailAddress();
 
         RuleFor(x => x.Password)
             .NotEmpty()

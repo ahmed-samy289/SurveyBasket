@@ -1,4 +1,5 @@
 ﻿using FluentValidation.AspNetCore;
+using Hangfire;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -46,7 +47,8 @@ public static class DependencyInjection
             .AddAuthConfig(configuration)
             .AddSwaggerServices()
             .AddFluentValidationServices()
-            .AddMapsterServices();
+            .AddMapsterServices()
+            .AddBackgroundJobsConfig(configuration);
 
         // Add application services
         services.AddScoped<IPollService, PollService>();
@@ -148,6 +150,21 @@ public static class DependencyInjection
             options.SignIn.RequireConfirmedEmail = true;
             options.User.RequireUniqueEmail = true;
         });
+
+        return services;
+    }
+
+    private static IServiceCollection AddBackgroundJobsConfig(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Add Hangfire services.
+        services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+
+        // Add the processing server as IHostedService
+        services.AddHangfireServer();
 
         return services;
     }
