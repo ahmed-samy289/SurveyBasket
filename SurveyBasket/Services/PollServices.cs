@@ -1,12 +1,14 @@
 ﻿
 
+using Hangfire;
 using SurveyBasket.Errors;
 
 namespace SurveyBasket.Services;
 
-public class PollService(ApplicationDbContext context) : IPollService
+public class PollService(ApplicationDbContext context, INotificationService notificationService) : IPollService
 {
     private readonly ApplicationDbContext _context = context;
+    private readonly INotificationService _notificationService = notificationService;
 
     public async Task<IEnumerable<PollResponse>> GetAllAsync(CancellationToken cancellationToken = default) =>
         await _context.Polls.AsNoTracking().ProjectToType<PollResponse>().ToListAsync(cancellationToken);
@@ -99,6 +101,11 @@ public class PollService(ApplicationDbContext context) : IPollService
         Poll.IsPublished = !Poll.IsPublished;
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        if (Poll.IsPublished && Poll.StartsAt == DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            BackgroundJob.Enqueue(() => _notificationService.SendNewPollsNotification(Poll.Id));
+        }
 
         return Result.Success();
 
