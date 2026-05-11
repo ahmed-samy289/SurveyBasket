@@ -6,13 +6,13 @@ namespace SurveyBasket.Services;
 public class NotificationService(
     ApplicationDbContext context,
     UserManager<ApplicationUser> userManager,
-    HttpContextAccessor httpContextAccessor,
+    IHttpContextAccessor httpContextAccessor,
     IEmailSender emailSender
     ) : INotificationService
 {
     private readonly ApplicationDbContext _context = context;
     private readonly UserManager<ApplicationUser> _userManager = userManager;
-    private readonly HttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
     private readonly IEmailSender _emailSender = emailSender;
 
     public async Task SendNewPollsNotification(int? pollId = null)

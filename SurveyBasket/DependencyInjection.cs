@@ -51,12 +51,14 @@ public static class DependencyInjection
             .AddBackgroundJobsConfig(configuration);
 
         // Add application services
-        services.AddScoped<IPollService, PollService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IEmailSender, EmailService>();
+        services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IPollService, PollService>();
         services.AddScoped<IQuestionService, QuestionService>();
         services.AddScoped<IVoteService, VoteService>();
         services.AddScoped<IResultService, ResultService>();
-        services.AddScoped<IEmailSender, EmailService>();
+        services.AddScoped<IUserService, UserService>();
 
 
         //Global error handling
