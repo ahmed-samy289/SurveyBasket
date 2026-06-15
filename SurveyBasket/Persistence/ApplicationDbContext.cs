@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace SurveyBasket.Persistence;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IHttpContextAccessor HttpContextAccessor) : 
-    IdentityDbContext<ApplicationUser>(options)
+    IdentityDbContext<ApplicationUser,ApplicationRole , string>(options)
 {
     private readonly IHttpContextAccessor _httpContextAccessor = HttpContextAccessor;
 
