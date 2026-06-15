@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using SurveyBasket.Authentication;
 using SurveyBasket.Errors;
 using SurveyBasket.Persistence;
@@ -27,6 +28,12 @@ public static class DependencyInjection
 
         services.AddDbContext<ApplicationDbContext>(Options => Options.UseSqlServer(connectionString));
 
+
+        // ignoring passwordhasher error during migrations
+        //    services.AddDbContext<ApplicationDbContext>(options =>
+        //options.UseSqlServer(connectionString)
+        //       .ConfigureWarnings(w =>
+        //           w.Ignore(RelationalEventId.PendingModelChangesWarning)));
 
         //handle CORS
         var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>();
@@ -119,7 +126,7 @@ public static class DependencyInjection
         var JwtSettings = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
 
         // Add Identity services
-        services.AddIdentity<ApplicationUser, IdentityRole>()
+        services.AddIdentity<ApplicationUser, ApplicationRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
