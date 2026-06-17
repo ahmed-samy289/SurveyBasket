@@ -29,12 +29,6 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>(Options => Options.UseSqlServer(connectionString));
 
 
-        // ignoring passwordhasher error during migrations
-        //    services.AddDbContext<ApplicationDbContext>(options =>
-        //options.UseSqlServer(connectionString)
-        //       .ConfigureWarnings(w =>
-        //           w.Ignore(RelationalEventId.PendingModelChangesWarning)));
-
         //handle CORS
         var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>();
 
