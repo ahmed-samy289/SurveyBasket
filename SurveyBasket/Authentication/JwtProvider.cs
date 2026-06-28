@@ -11,50 +11,44 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 {
     private readonly JwtOptions _options = options.Value;
 
-    public (string Token, int ExpiresIn) GenerateJwtToken(ApplicationUser user, IEnumerable<string> roles, IEnumerable<string> permissions)
+    public (string token, int expiresIn) GenerateToken(ApplicationUser user, IEnumerable<string> roles, IEnumerable<string> permissions)
     {
-
         Claim[] claims = [
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-            new Claim(JwtRegisteredClaimNames.Email,user.Email!),
-            new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName),
-            new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(nameof(roles) , JsonSerializer.Serialize(roles) , JsonClaimValueTypes.JsonArray),
-            new Claim(nameof(permissions) , JsonSerializer.Serialize(permissions),JsonClaimValueTypes.JsonArray),
+            new(JwtRegisteredClaimNames.Sub, user.Id),
+            new(JwtRegisteredClaimNames.Email, user.Email!),
+            new(JwtRegisteredClaimNames.GivenName, user.FirstName),
+            new(JwtRegisteredClaimNames.FamilyName, user.LastName),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(nameof(roles), JsonSerializer.Serialize(roles), JsonClaimValueTypes.JsonArray),
+            new(nameof(permissions), JsonSerializer.Serialize(permissions), JsonClaimValueTypes.JsonArray)
         ];
 
+        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
 
-        var symmetricSecuritKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
-
-        var signingCredentials = new SigningCredentials(symmetricSecuritKey, SecurityAlgorithms.HmacSha256);
-
-        //
-        var ExpiresIn = _options.DurationInMinutes; // minutes
-        var expirationDate = DateTime.UtcNow.AddMinutes(ExpiresIn);
+        var singingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
             issuer: _options.Issuer,
             audience: _options.Audience,
             claims: claims,
-            expires: expirationDate,
-            signingCredentials: signingCredentials
+            expires: DateTime.UtcNow.AddMinutes(_options.DurationInMinutes),
+            signingCredentials: singingCredentials
         );
 
-        return (new JwtSecurityTokenHandler().WriteToken(token), ExpiresIn*60);
+        return (token: new JwtSecurityTokenHandler().WriteToken(token), expiresIn: _options.DurationInMinutes * 60);
     }
 
     public string? ValidateToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var symmetricSecuritKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
+        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
 
         try
         {
             tokenHandler.ValidateToken(token, new TokenValidationParameters
             {
+                IssuerSigningKey = symmetricSecurityKey,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = symmetricSecuritKey,
                 ValidateIssuer = false,
                 ValidateAudience = false,
                 ClockSkew = TimeSpan.Zero

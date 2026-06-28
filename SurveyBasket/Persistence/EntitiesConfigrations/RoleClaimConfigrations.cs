@@ -1,14 +1,12 @@
-﻿
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using SurveyBasket.Abstractions.Consts;
+﻿using SurveyBasket.Abstractions.Consts;
 
-namespace SurveyBasket.Persistence.EntitiesConfigrations;
+namespace SurveyBasket.Persistence.EntitiesConfigurations;
 
-public class RoleClaimConfigrations : IEntityTypeConfiguration<IdentityRoleClaim<string>>
+public class RoleClaimConfiguration : IEntityTypeConfiguration<IdentityRoleClaim<string>>
 {
     public void Configure(EntityTypeBuilder<IdentityRoleClaim<string>> builder)
     {
+        //Default Data
         var permissions = Permissions.GetAllPermissions();
         var adminClaims = new List<IdentityRoleClaim<string>>();
 
@@ -25,5 +23,4 @@ public class RoleClaimConfigrations : IEntityTypeConfiguration<IdentityRoleClaim
 
         builder.HasData(adminClaims);
     }
- 
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using SurveyBasket.Abstractions;
+using SurveyBasket.Abstractions.Consts;
 using SurveyBasket.Contracts.Polls;
 using SurveyBasket.Errors;
 
@@ -7,24 +8,27 @@ namespace SurveyBasket.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize]
+
 public class PollsController(IPollService pollService) : ControllerBase
 {
     private readonly IPollService _pollService = pollService;
     
     [HttpGet("")]
+    [HasPermission(Permissions.GetPolls)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         return Ok(await _pollService.GetAllAsync(cancellationToken));
     }
 
     [HttpGet("current")]
+    [Authorize(Roles = DefaultRoles.Member)]
     public async Task<IActionResult> GetCurrent(CancellationToken cancellationToken)
     {
         return Ok(await _pollService.GetCurrentAsync(cancellationToken));
     }
 
     [HttpGet("{Id}")]
+    [HasPermission(Permissions.GetPolls)]
     public async Task<IActionResult> Get([FromRoute]int Id, CancellationToken cancellationToken)
     {
         var result =await _pollService.GetAsync(Id,cancellationToken);

@@ -2,7 +2,7 @@
 
 public static class Permissions
 {
-    public static string Type { get; set; } = "Permissions";
+    public static string Type { get; } = "permissions";
 
     public const string GetPolls = "poll:read";
     public const string AddPolls = "poll:add";
@@ -23,6 +23,6 @@ public static class Permissions
 
     public const string Results = "result:read";
 
-    public static IList<string?> GetAllPermissions() => 
+    public static IList<string?> GetAllPermissions() =>
         typeof(Permissions).GetFields().Select(x => x.GetValue(x) as string).ToList();
 }

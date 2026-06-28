@@ -47,7 +47,7 @@ public class AuthService(
 
             var (userRoles, userPermissions) = await GetUserRolesAndPermessions(User, cancellationToken);
 
-            var (Token, ExpiresIn) = _JwtProvider.GenerateJwtToken(User, userRoles, userPermissions);
+            var (Token, ExpiresIn) = _JwtProvider.GenerateToken(User, userRoles, userPermissions);
 
             var RefreshToken = GenerateRefreshToken();
 
@@ -96,7 +96,7 @@ public class AuthService(
 
         var (userRoles, userPermissions) = await GetUserRolesAndPermessions(User, cancellationToken);
 
-        var (NewToken, ExpiresIn) = _JwtProvider.GenerateJwtToken(User, userRoles, userPermissions);
+        var (NewToken, ExpiresIn) = _JwtProvider.GenerateToken(User, userRoles, userPermissions);
 
         var NewRefreshToken = GenerateRefreshToken();
 
