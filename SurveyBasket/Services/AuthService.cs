@@ -41,6 +41,11 @@ public class AuthService(
             return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
         }
 
+        if (User.IsDisabled)
+        {
+            return Result.Failure<AuthResponse>(UserErrors.UserDisabled);
+        }
+
         var result = await _signInManager.PasswordSignInAsync(User, Password, false, false);
 
         if (result.Succeeded) {
@@ -83,6 +88,11 @@ public class AuthService(
         if (User is null)
         {
             return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
+        }
+
+        if (User.IsDisabled)
+        {
+            return Result.Failure<AuthResponse>(UserErrors.UserDisabled);
         }
 
         var storedRefreshToken = User.RefreshTokens.FirstOrDefault(rt => rt.Token == RefreshToken && rt.IsActive);
