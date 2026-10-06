@@ -12,6 +12,9 @@ public class UserErrors
    
     public static readonly Error UserDisabled =
         new("User.UserDisabled", "User Disabled, Contact your administrator", StatusCodes.Status401Unauthorized);
+    
+    public static readonly Error UserLockedOut =
+        new("User.UserLockedOut", "User LockedOut", StatusCodes.Status401Unauthorized);
 
     public static readonly Error InvalidRefreshToken =
         new("User.InvalidRefreshToken", "Invalid refresh token", StatusCodes.Status401Unauthorized);
