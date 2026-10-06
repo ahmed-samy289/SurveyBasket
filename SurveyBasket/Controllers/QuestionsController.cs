@@ -1,66 +1,59 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using SurveyBasket.Abstractions.Consts;
 using SurveyBasket.Contracts.Question;
-using SurveyBasket.Errors;
-using System.Threading.Tasks;
+
 
 namespace SurveyBasket.Controllers;
-[Route("api/polls/{PollId}/[controller]")]
+
+[Route("api/polls/{pollId}/[controller]")]
 [ApiController]
-[Authorize]
 public class QuestionsController(IQuestionService questionService) : ControllerBase
 {
     private readonly IQuestionService _questionService = questionService;
 
     [HttpGet("")]
-    public async Task<IActionResult> GetAll([FromRoute] int PollId,CancellationToken cancellationToken)
+    [HasPermission(Permissions.GetQuestions)]
+    public async Task<IActionResult> GetAll([FromRoute] int pollId, CancellationToken cancellationToken)
     {
-        var result = await _questionService.GetAllAsync(PollId, cancellationToken);
+        var result = await _questionService.GetAllAsync(pollId, cancellationToken);
 
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
-    [HttpGet("{Id}")]
-    public async Task<IActionResult> Get([FromRoute] int PollId,[FromRoute] int Id, CancellationToken cancellationToken)
+    [HttpGet("{id}")]
+    [HasPermission(Permissions.GetQuestions)]
+    public async Task<IActionResult> Get([FromRoute] int pollId, [FromRoute] int id, CancellationToken cancellationToken)
     {
-        var result = await _questionService.GetAsync(PollId, Id, cancellationToken);
+        var result = await _questionService.GetAsync(pollId, id, cancellationToken);
 
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
     [HttpPost("")]
-    public async Task<IActionResult> Add([FromRoute] int PollId, [FromBody] QuestionRequest request, CancellationToken cancellationToken)
+    [HasPermission(Permissions.AddQuestions)]
+    public async Task<IActionResult> Add([FromRoute] int pollId, [FromBody] QuestionRequest request, CancellationToken cancellationToken)
     {
-        var result = await _questionService.AddAsync(PollId, request, cancellationToken);
+        var result = await _questionService.AddAsync(pollId, request, cancellationToken);
 
-        if (result.IsSuccess)
-        {
-            return CreatedAtAction(nameof(Get), new { PollId, Id = result.Value.Id }, result.Value);
-        }
-
-        return result.ToProblem();
+        return result.IsSuccess
+            ? CreatedAtAction(nameof(Get), new { pollId, result.Value.Id }, result.Value)
+            : result.ToProblem();
     }
 
-    [HttpPut("{Id}")]
-    public async Task<IActionResult> Update([FromRoute] int PollId, [FromRoute] int Id, [FromBody] QuestionRequest request, CancellationToken cancellationToken)
+    [HttpPut("{id}")]
+    [HasPermission(Permissions.UpdateQuestions)]
+    public async Task<IActionResult> Update([FromRoute] int pollId, [FromRoute] int id, [FromBody] QuestionRequest request, CancellationToken cancellationToken)
     {
-        var result = await _questionService.UpdateAsync(PollId, Id, request, cancellationToken);
+        var result = await _questionService.UpdateAsync(pollId, id, request, cancellationToken);
 
-        if (result.IsSuccess)
-        {
-            return NoContent();
-        }
-
-        return result.ToProblem();
+        return result.IsSuccess ? NoContent() : result.ToProblem();
     }
 
-    [HttpPut("{Id}/toggleStatus")]
-    public async Task<IActionResult> ToggleStatus([FromRoute] int PollId, [FromRoute] int Id, CancellationToken cancellationToken)
+    [HttpPut("{id}/toggleStatus")]
+    [HasPermission(Permissions.UpdateQuestions)]
+    public async Task<IActionResult> ToggleStatus([FromRoute] int pollId, [FromRoute] int id, CancellationToken cancellationToken)
     {
-        var IsToggled = await _questionService.ToggleStatusAsync(PollId, Id, cancellationToken);
+        var result = await _questionService.ToggleStatusAsync(pollId, id, cancellationToken);
 
-        return IsToggled.IsSuccess ? NoContent() : IsToggled.ToProblem();
+        return result.IsSuccess ? NoContent() : result.ToProblem();
     }
-
 }

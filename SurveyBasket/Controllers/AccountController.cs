@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using SurveyBasket.Contracts.Users;
 using SurveyBasket.Extentions;
 
 namespace SurveyBasket.Controllers;
+
 [Route("me")]
 [ApiController]
 [Authorize]
@@ -14,7 +12,7 @@ public class AccountController(IUserService userService) : ControllerBase
     private readonly IUserService _userService = userService;
 
     [HttpGet("")]
-    public async Task<IActionResult> info()
+    public async Task<IActionResult> Info()
     {
         var result = await _userService.GetUserProfileAsync(User.GetUserId()!);
 
@@ -22,7 +20,7 @@ public class AccountController(IUserService userService) : ControllerBase
     }
 
     [HttpPut("info")]
-    public async Task<IActionResult> update([FromBody] UpdateUserProfileRequest request)
+    public async Task<IActionResult> Info([FromBody] UpdateUserProfileRequest request)
     {
         await _userService.UpdateUserProfileAsync(User.GetUserId()!, request);
 
@@ -36,7 +34,4 @@ public class AccountController(IUserService userService) : ControllerBase
 
         return result.IsSuccess ? NoContent() : result.ToProblem();
     }
-
-
-
 }

@@ -1,33 +1,27 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using SurveyBasket.Abstractions.Consts;
 using SurveyBasket.Contracts.Vote;
-using SurveyBasket.Errors;
 using SurveyBasket.Extentions;
-using System.Security.Claims;
 
 namespace SurveyBasket.Controllers;
+
 [Route("api/polls/{pollId}/vote")]
 [ApiController]
 [Authorize(Roles = DefaultRoles.Member)]
-public class VotesController(IQuestionService questionService,IVoteService voteService) : ControllerBase
+public class VotesController(IQuestionService questionService, IVoteService voteService) : ControllerBase
 {
     private readonly IQuestionService _questionService = questionService;
     private readonly IVoteService _voteService = voteService;
 
     [HttpGet("")]
-    public async Task<IActionResult> Start(int pollId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Start([FromRoute] int pollId, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
+
         var result = await _questionService.GetAvailableAsync(pollId, userId!, cancellationToken);
 
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
 
-        return result.ToProblem();
     }
 
     [HttpPost("")]
@@ -35,11 +29,6 @@ public class VotesController(IQuestionService questionService,IVoteService voteS
     {
         var result = await _voteService.AddAsync(pollId, User.GetUserId()!, request, cancellationToken);
 
-        if (result.IsSuccess)
-        {
-            return Created();
-        }
-
-        return result.ToProblem();
+        return result.IsSuccess ? Created() : result.ToProblem();
     }
 }
