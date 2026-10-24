@@ -12,17 +12,10 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionReq
         if (user is null || !user.IsAuthenticated)
             return;
 
-        foreach (var claim in context.User.Claims)
-        {
-            Console.WriteLine($"Type: {claim.Type} | Value: {claim.Value}");
-        }
-
         var hasPermission = context.User.Claims.Any(x => x.Value == requirement.Permission && x.Type == Permissions.Type);
 
         if (!hasPermission)
             return;
-
-
 
         //if (context.User.Identity is not { IsAuthenticated: true } ||
         //    !context.User.Claims.Any(x => x.Value == requirement.Permission && x.Type == Permissions.Type))
