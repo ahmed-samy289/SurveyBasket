@@ -14,7 +14,7 @@ public class RoleRequestValidator:AbstractValidator<RoleRequest>
 
         RuleFor(x => x.Permissions)
             .Must(x => x.Distinct().Count() == x.Count())
-            .WithMessage("you cannot add duplicated permission for this role")
+            .WithMessage("you cannot add duplicated permission for the same role")
             .When(x => x.Permissions != null);
 
     }
