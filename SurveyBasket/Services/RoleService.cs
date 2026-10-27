@@ -145,5 +145,18 @@ public class RoleService(RoleManager<ApplicationRole> roleManager,ApplicationDbC
 
     }
 
+    public async Task<Result> ToggleAsync(string Id)
+    {
+        
+        if (await _roleManager.FindByIdAsync(Id) is not { } role)
+        {
+            return Result.Failure<RoleDetailResponse>(RoleErrors.RoleNotFound);
+        }
 
+        role.IsDeleted = !role.IsDeleted;
+
+        var result = await _roleManager.UpdateAsync(role);
+
+        return Result.Success();
+    }
 }
