@@ -8,4 +8,5 @@ public interface IRoleService
     Task<Result<RoleDetailResponse>> GetAsync(string id);
     Task<Result<RoleDetailResponse>> AddAsync(RoleRequest request);
     Task<Result> UpdateAsync(string Id, RoleRequest request);
+    Task<Result> ToggleAsync(string Id);
 }
