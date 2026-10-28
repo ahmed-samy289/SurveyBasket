@@ -1,6 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SurveyBasket.Abstractions.Consts;
+using SurveyBasket.Contracts.Roles;
 using SurveyBasket.Contracts.Users;
+using SurveyBasket.Errors;
 
 namespace SurveyBasket.Services;
 
@@ -35,6 +38,20 @@ public class UserService(UserManager<ApplicationUser> userManager , ApplicationD
                         x.SelectMany(y => y.Roles)
                  ))
                  .ToListAsync(cancellationToken);
+
+    public async Task<Result<UserResponse>> GetUserByIdAsync(string Id)
+    {
+        if (await _userManager.FindByIdAsync(Id) is not { } user)
+        {
+            return Result.Failure<UserResponse>(UserErrors.UserNotFound);
+        }
+
+        var roles = await _userManager.GetRolesAsync(user);
+
+        var response = (user,roles).Adapt<UserResponse>();
+
+        return Result.Success(response);
+    }
 
     public async Task<Result<GetUserProfileResponse>> GetUserProfileAsync(string UserId)
     {

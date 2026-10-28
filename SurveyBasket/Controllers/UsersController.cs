@@ -11,10 +11,17 @@ public class UsersController(IUserService userService) : ControllerBase
 
     [HttpGet("")]
     [HasPermission(Permissions.GetUsers)]
-    public async Task<IActionResult> GetAll(
-    CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        return Ok(
-            await _userService.GetAllAsync(cancellationToken));
+        return Ok(await _userService.GetAllAsync(cancellationToken));
+    }
+
+    [HttpGet("{id}")]
+    [HasPermission(Permissions.GetUsers)]
+    public async Task<IActionResult> GetById(string id)
+    {
+        var result = await _userService.GetUserByIdAsync(id);
+        
+        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
     }
 }

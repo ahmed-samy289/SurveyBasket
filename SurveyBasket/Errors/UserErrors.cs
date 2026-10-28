@@ -9,7 +9,10 @@ public class UserErrors
 
     public static readonly Error InvalidJwtToken =
         new("User.InvalidJwtToken", "Invalid Jwt token", StatusCodes.Status401Unauthorized);
-   
+
+    public static readonly Error UserNotFound =
+        new Error("User.UserNotFound", "User not found", StatusCodes.Status404NotFound);
+
     public static readonly Error UserDisabled =
         new("User.UserDisabled", "User Disabled, Contact your administrator", StatusCodes.Status401Unauthorized);
     
