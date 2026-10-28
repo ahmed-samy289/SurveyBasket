@@ -17,14 +17,24 @@ public class UserService(UserManager<ApplicationUser> userManager , ApplicationD
                 join r in _context.Roles
                     on ur.RoleId equals r.Id into roles
                 where !roles.Any(x => x.Name == DefaultRoles.Member)
-                select new UserResponse(
+                select new {
                     u.Id,
                     u.FirstName,
                     u.LastName,
-                    u.Email!,
+                    u.Email,
                     u.IsDisabled,
-                    roles.Select(x => x.Name!).ToList()
-                )).ToListAsync(cancellationToken);
+                    Roles = roles.Select(x => x.Name!).ToList()
+                }
+                ).GroupBy(x => new { x.Id, x.FirstName, x.LastName, x.Email, x.IsDisabled })
+                 .Select(x=> new UserResponse (
+                        x.Key.Id,
+                        x.Key.FirstName,
+                        x.Key.LastName,
+                        x.Key.Email,
+                        x.Key.IsDisabled,
+                        x.SelectMany(y => y.Roles)
+                 ))
+                 .ToListAsync(cancellationToken);
 
     public async Task<Result<GetUserProfileResponse>> GetUserProfileAsync(string UserId)
     {
