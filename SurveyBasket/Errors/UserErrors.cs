@@ -33,4 +33,7 @@ public class UserErrors
     
     public static readonly Error DuplictedConfirmation =
         new("User.DuplictedConfirmation", "Email confirmed before", StatusCodes.Status401Unauthorized);
+
+    public static readonly Error InvalidRoles =
+        new("User.InvalidRoles", "Invalid roles", StatusCodes.Status400BadRequest);
 }
