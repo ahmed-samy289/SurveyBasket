@@ -20,5 +20,9 @@ public class MappingConfigrations : IRegister
         config.NewConfig<CreateUserRequest, ApplicationUser>()
             .Map(des => des.UserName, src => src.Email)
             .Map(des => des.EmailConfirmed, src => true);
+
+        config.NewConfig<UpdateUserRequest, ApplicationUser>()
+            .Map(des => des.UserName, src => src.Email)
+            .Map(des => des.NormalizedUserName, src => src.Email.ToUpper());
     }
 }
