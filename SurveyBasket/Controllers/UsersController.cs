@@ -43,4 +43,13 @@ public class UsersController(IUserService userService) : ControllerBase
 
         return result.IsSuccess ? NoContent() : result.ToProblem();
     }
+    
+    [HttpPut("{id}/toggle-status")]
+    [HasPermission(Permissions.UpdateUsers)]
+    public async Task<IActionResult> ToggleStatus([FromRoute]string id,CancellationToken cancellationToken)
+    {
+        var result = await _userService.ToggleStatusAsync(id,cancellationToken);
+
+        return result.IsSuccess ? NoContent() : result.ToProblem();
+    }
 }

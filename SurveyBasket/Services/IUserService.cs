@@ -8,6 +8,7 @@ public interface IUserService
     Task<Result<UserResponse>> GetUserByIdAsync(string Id);
     Task<Result<UserResponse>> AddAsync(CreateUserRequest request, CancellationToken cancellationToken);
     Task<Result> UpdateAsync(string Id, UpdateUserRequest request, CancellationToken cancellationToken);
+    Task<Result> ToggleStatusAsync(string Id, CancellationToken cancellationToken);
 
     Task<Result<GetUserProfileResponse>> GetUserProfileAsync(string UserId);
     Task<Result> UpdateUserProfileAsync(string Id, UpdateUserProfileRequest request);
