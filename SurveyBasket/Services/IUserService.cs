@@ -5,8 +5,15 @@ namespace SurveyBasket.Services;
 public interface IUserService
 {
     Task<IEnumerable<UserResponse>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<Result<UserResponse>> GetUserByIdAsync(string Id);
+    Task<Result<UserResponse>> AddAsync(CreateUserRequest request, CancellationToken cancellationToken);
+    Task<Result> UpdateAsync(string Id, UpdateUserRequest request, CancellationToken cancellationToken);
+    Task<Result> ToggleStatusAsync(string Id, CancellationToken cancellationToken);
+    Task<Result> UnlockAsync(string Id);
+
     Task<Result<GetUserProfileResponse>> GetUserProfileAsync(string UserId);
     Task<Result> UpdateUserProfileAsync(string Id, UpdateUserProfileRequest request);
     Task<Result> ChangePasswordAsync(string UserId, ChangePasswordRequest request);
 
 }
+

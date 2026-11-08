@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SurveyBasket.Abstractions.Consts;
+using SurveyBasket.Contracts.Users;
 
 namespace SurveyBasket.Controllers;
 [Route("api/[controller]")]
@@ -11,10 +12,53 @@ public class UsersController(IUserService userService) : ControllerBase
 
     [HttpGet("")]
     [HasPermission(Permissions.GetUsers)]
-    public async Task<IActionResult> GetAll(
-    CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        return Ok(
-            await _userService.GetAllAsync(cancellationToken));
+        return Ok(await _userService.GetAllAsync(cancellationToken));
+    }
+
+    [HttpGet("{id}")]
+    [HasPermission(Permissions.GetUsers)]
+    public async Task<IActionResult> GetById(string id)
+    {
+        var result = await _userService.GetUserByIdAsync(id);
+        
+        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+    }
+    
+    [HttpPost("")]
+    [HasPermission(Permissions.AddUsers)]
+    public async Task<IActionResult> Add([FromBody] CreateUserRequest request,CancellationToken cancellationToken)
+    {
+        var result = await _userService.AddAsync(request, cancellationToken);
+
+        return result.IsSuccess ? CreatedAtAction(nameof(Add), new { result.Value.Id }, result.Value) : result.ToProblem();
+    }
+    
+    [HttpPut("{id}")]
+    [HasPermission(Permissions.UpdateUsers)]
+    public async Task<IActionResult> Update([FromRoute]string id,[FromBody] UpdateUserRequest request,CancellationToken cancellationToken)
+    {
+        var result = await _userService.UpdateAsync(id, request, cancellationToken);
+
+        return result.IsSuccess ? NoContent() : result.ToProblem();
+    }
+    
+    [HttpPut("{id}/toggle-status")]
+    [HasPermission(Permissions.UpdateUsers)]
+    public async Task<IActionResult> ToggleStatus([FromRoute]string id,CancellationToken cancellationToken)
+    {
+        var result = await _userService.ToggleStatusAsync(id,cancellationToken);
+
+        return result.IsSuccess ? NoContent() : result.ToProblem();
+    }
+    
+    [HttpPut("{id}/unlock")]
+    [HasPermission(Permissions.UpdateUsers)]
+    public async Task<IActionResult> Unlock([FromRoute]string id)
+    {
+        var result = await _userService.UnlockAsync(id);
+
+        return result.IsSuccess ? NoContent() : result.ToProblem();
     }
 }
